@@ -1,0 +1,40 @@
+.navbar {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    margin: 0;
+    z-index: 1000;
+}
+
+.navbar ul {
+    display: flex;
+    justify-content: space-between;
+    background-color: black;
+    list-style-type: none;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    z-index: 1000;
+  }
+  
+  /* Style rule set for individual li */
+  .navbar ul li {
+    margin: 20px;
+  }
+  
+  
+  /* Style rule set for individual li link */
+  .navbar ul li a {
+    color: white;
+    display: block;
+    font-size: 15px;
+    text-decoration: none;
+  }
+  
+  /* Style rule set for hovered link */
+  .navbar ul li a:hover {
+    font-weight: bold;
+  }
