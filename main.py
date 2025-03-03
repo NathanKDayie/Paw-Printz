@@ -1,4 +1,6 @@
 import random
+import os
+import json
 from datetime import datetime
 
 happy_keywords = {
@@ -78,6 +80,36 @@ def save_interaction(pet_name, mood, response):
         "response": response
     })
 
+def conversation_log_to_json(new_data):
+    file_path = "database/conversation_log.json"
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    # Check if file exists and read existing data
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, "r") as file:
+                data = json.load(file)  # Load existing data
+                if not isinstance(data, list):  # Ensure it's a list
+                    data = []
+        except (json.JSONDecodeError, FileNotFoundError):  # Handle invalid JSON or missing file
+            data = []
+    else:
+        data = []  # Initialize an empty list if file doesn't exist
+
+    # Append new data
+    data.append(new_data)
+
+    # Write updated data back to the file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+    print("Conversation log file updated successfully!")
+
+def mood_log_to_json(data):
+    with open("database/mood_log.json", "w") as file:
+        json.dump(data, file)
+    print("Mood Log file updated successfully!")
 
 ui_pet_name = input("What is your pet's name? ")
 print(f"\nNice to meet you! I'm {ui_pet_name}, your mood companion! 🐾\n")
@@ -104,6 +136,7 @@ while True:
             print(f"\n{follow_up}")
             print(f"\n{video_response}")
             save_interaction(ui_pet_name, mood, ui_mood)
+            conversation_log_to_json(conversation_history)
             mood_detected = True
             break
 
