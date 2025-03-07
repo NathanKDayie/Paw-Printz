@@ -1,0 +1,28 @@
+[
+    [
+        {
+            "timestamp": "2025-02-27 15:47:17",
+            "mood": "happy",
+            "response": "feelin happy"
+        }
+    ],
+    [
+        {
+            "timestamp": "2025-03-02 22:16:41",
+            "mood": "neutral",
+            "response": "feelin alright"
+        }
+    ],
+    [
+        {
+            "timestamp": "2025-03-02 22:16:41",
+            "mood": "neutral",
+            "response": "feelin alright"
+        },
+        {
+            "timestamp": "2025-03-02 22:16:48",
+            "mood": "sad",
+            "response": "actually, kinda feelin upset"
+        }
+    ]
+]
