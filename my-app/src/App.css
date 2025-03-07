@@ -28,7 +28,7 @@ div {
 }
 
 .logo{
-    width: 17rem;
+    width: 12rem;
     padding: 15px;
 }
 
@@ -87,6 +87,6 @@ div {
     display: flex;
     text-decoration: none;
     align-items: center;
-    padding: 1rem;
+    padding: 0.25rem;
     color: white;
 }
