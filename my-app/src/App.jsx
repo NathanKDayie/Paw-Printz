@@ -37,8 +37,8 @@ function Footer() {
   return (
     <div className="footer">
       <ul>
-        <p><a href="https://my.umbc.edu">myUMBC</a></p>
-        <p><a href="https://health.umbc.edu">RIH</a></p>
+        <p><a href="https://my.umbc.edu" target="_blank">myUMBC</a></p>
+        <p><a href="https://health.umbc.edu" target="_blank">RIH</a></p>
       </ul>
     </div>
   )
