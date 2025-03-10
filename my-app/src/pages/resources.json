@@ -1,0 +1,132 @@
+[
+    {
+        "category": "Campus Resources",
+        "links": [
+            {
+                "title": "UMBC Counseling Center",
+                "url": "https://health.umbc.edu/counseling-services/counseling/",
+                "desc": "Retriever Integrated Health (RIH) supports students mental and emotional well-being through counseling and resources for issues like anxiety, academics, and relationships. Schedule a 20-minute consultation in person, by calling 410-455-2542, or online via myRetrieverCare."
+            },
+            {
+                "title": "myRetrieverCare",
+                "url": "http://myretrievercare.umbc.edu/",
+                "desc": "myRetrieverCare is an online portal for students to access health and counseling services, schedule appointments, and manage their health information."
+            },
+            {
+                "title": "UMBC Emergency Crisis and After Hours Care",
+                "url": "https://health.umbc.edu/health-services/emergency-and-after-hours-care/",
+                "desc": "UMBC's emergency campus mental health resources. This includes information on how to access emergency care and after-hours support."
+            },
+            {
+                "title": "Residential Life",
+                "url": "https://reslife.umbc.edu/",
+                "desc": "Residential Life provides on-campus housing, support, and resources for students living in UMBC residence halls."
+            },
+            {
+                "title": "Office of Equity and Inclusion",
+                "url": "https://oei.umbc.edu/",
+                "desc": "The OEI promotes diversity, equity, and inclusion at UMBC through programs, training, and resources."
+            },
+            {
+                "title": "Womens Center",
+                "url": "https://womenscenter.umbc.edu/",
+                "desc": "The Womens Center at UMBC provides a safe space for students to engage in discussions, workshops, and events related. All are welcome, with respect for women, their experiences, and their potential."
+            },
+            {
+                "title": "i3b - Initiatives for Identity, Inclusion & Belonging",
+                "url": "https://i3b.umbc.edu/",
+                "desc": "i3B is a UMBC initiative that promotes identity, inclusion, and belonging through programs, events, and resources for students."
+            }
+        ]
+    },
+    {
+        "category": "Mental Wellness & Growth",
+        "links": [
+            {
+                "title": "Calm",
+                "url": "https://www.calm.com/",
+                "desc": "A meditation and mindfulness app designed to support mental well-being. It offers guided meditations, sleep stories, breathing exercises, relaxing music, and classes to help users manage stress, improve focus, and sleep better."
+            },
+            {
+                "title": "Headspace",
+                "url": "https://www.headspace.com/",
+                "desc": "A mobile app offering guided meditations, mindfulness exercises, and mental health support. It helps users reduce stress, improve focus, and enhance sleep through features like sleepcasts, daily meditations, and personalized coaching."
+            },
+            {
+                "title": "Insight Timer",
+                "url": "https://insighttimer.com/",
+                "desc": "A free app and website offering guided meditations, music, expert talks, and mindfulness courses to support stress relief, sleep, and well-being. It features yoga classes, mood tracking, and discussion groups, making mindfulness accessible to all."
+            },
+            {
+                "title": "Welltrack Boost",
+                "url": "https://umbc.welltrack-boost.com/",
+                "desc": "Welltrack Boost is a self-help app that provides resources and tools for mental health and wellness."
+            }
+        ]
+    },
+    {
+        "category": "Community & Connection",
+        "links": [
+            {
+                "title": "On Campus Events",
+                "url": "https://my.umbc.edu/events",
+                "desc": "A list of events happening on the UMBC campus, including workshops, lectures, and social gatherings."
+            },
+            {
+                "title": "Health Promotion Events",
+                "url": "https://healthpromotion.umbc.edu/events/",
+                "desc": "Health Promotion hosts events and workshops on topics related to health and wellness, including stress management, nutrition, and sexual health."
+            },
+            {
+                "title": "Togetherall",
+                "url": "https://account.v2.togetherall.com/register/student",
+                "desc": "Togetherall is an online community for students to connect, share experiences, and support each other in a safe and anonymous environment."
+            }
+        ]
+    },
+    {
+        "category": "Productivity & Focus",
+        "links": [
+            {
+                "title": "studywithme.io",
+                "url": "https://studywithme.io/",
+                "desc": "A platform for students to study together online, share study tips, and stay motivated."
+            },
+            {
+                "title": "Habitica",
+                "url": "https://habitica.com",
+                "desc": "Habitica is a habit-building and productivity app that gamifies your tasks and goals."
+            },
+            {
+                "title": "Notion",
+                "url": "https://www.notion.com",
+                "desc": "Notion is an all-in-one workspace for note-taking, project management, and collaboration."
+            },
+            {
+                "title": "Finch",
+                "url": "https://finchcare.com",
+                "desc": "Finch is a productivity app that helps you stay focused and organized with tasks, reminders, and goals."
+            }
+        ]
+    },
+    {
+        "category": "Crisis Support",
+        "links": [
+            {
+                "title": "UMBC Emergency Crisis and After Hours Care",
+                "url": "https://health.umbc.edu/health-services/emergency-and-after-hours-care/",
+                "desc": "UMBC's emergency campus mental health resources. This includes information on how to access emergency care and after-hours support."
+            },
+            {
+                "title": "988 Lifeline",
+                "url": "https://chat.988lifeline.org",
+                "desc": "The 988 Lifeline is a 24/7 crisis hotline for individuals in the United States. It provides free and confidential support for people in distress, prevention, and crisis resources."
+            },
+            {
+                "title": "Campus Police",
+                "url": "https://police.umbc.edu",
+                "desc": "UMBC Campus Police is available 24/7 for emergency situations. Call number 410-455-5555 or 911 for immediate assistance, to report a crime, or for a safety escort."
+            }
+        ]
+    }
+]

@@ -6,6 +6,15 @@ body, html {
     flex-direction: column;
 }
 
+.headers {
+    display: flex;
+    font-family: sans-serif;
+    color: rgb(1, 1, 0);
+    font-weight: bold;
+    text-align: center;
+    padding: 15px;
+}
+
 div {
     display: flex;
     flex-direction: column;
@@ -28,7 +37,7 @@ div {
 }
 
 .logo{
-    width: 12rem;
+    width: 15rem;
     padding: 15px;
 }
 
