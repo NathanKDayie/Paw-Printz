@@ -1,4 +1,5 @@
-import {Route, Routes, Link} from 'react-router-dom'
+import {Route, Routes, } from 'react-router-dom'
+import {useState} from 'react'
 import Nav from './Nav'
 import Logs from './pages/Logs'
 import Store from './pages/Store'
@@ -29,7 +30,34 @@ function Home() {
     <div>
       <h1>Welcome to Paw Printz!</h1>
       <p> This is the home page </p>
+      <Checkbox />
+      <div className="pet-container">
+        <></>
+      </div>
     </div>
+  )
+}
+
+function Checkbox() {
+  const [visible, setVisible] = useState(true);
+
+  return (
+    <>
+      {visible && (
+        <div className="check-box">
+          <label 
+              htmlFor="check" 
+            >
+              Mark as Complete
+            </label>
+            <input 
+              type="checkbox" 
+              id="check" 
+              onClick={() => setVisible(false)}
+            />
+        </div>
+      )}
+    </>
   )
 }
 

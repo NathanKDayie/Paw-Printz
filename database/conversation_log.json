@@ -24,5 +24,31 @@
             "mood": "sad",
             "response": "actually, kinda feelin upset"
         }
+    ],
+    [
+        {
+            "timestamp": "2025-03-11 11:12:32",
+            "mood": "happy",
+            "response": "I'm feeling pretty good! I had a good day today."
+        }
+    ],
+    [
+        {
+            "timestamp": "2025-03-11 11:13:11",
+            "mood": "happy",
+            "response": "I'm feeling pretty good. I had a really good day today Junebug :)"
+        }
+    ],
+    [
+        {
+            "timestamp": "2025-03-11 11:13:11",
+            "mood": "happy",
+            "response": "I'm feeling pretty good. I had a really good day today Junebug :)"
+        },
+        {
+            "timestamp": "2025-03-11 11:13:24",
+            "mood": "sad",
+            "response": "I'm feeling sad. I did bad on my exam,"
+        }
     ]
 ]
