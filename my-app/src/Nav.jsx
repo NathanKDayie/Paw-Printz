@@ -11,6 +11,7 @@ export default function Nav() {
                 <img className="logo" src={title} alt="PawPrintz logo" />
             </Link>
             <ul>
+                <CustomLink to="/" className="nav-link">Home</CustomLink>
                 <CustomLink to="/logs" className="nav-link">Mood Log</CustomLink>
                 <CustomLink to="/store" className="nav-link">Store</CustomLink>
                 <CustomLink to="/resourcepage" className="nav-link">Resources</CustomLink>
