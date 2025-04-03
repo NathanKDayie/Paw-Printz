@@ -28,7 +28,6 @@ div {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
-    gap: 2rem;
     color: white;
     background-color: black;
 }
@@ -42,7 +41,7 @@ div {
     display: flex;
     list-style: none;
     align-items: center;
-    padding: 1rem;
+    padding: 2%;
     margin: 0;
     gap: 1rem;
 }
@@ -51,7 +50,7 @@ div {
     display: flex;
     text-decoration: none;
     align-items: center;
-    padding: 1rem;
+    padding: 10px;
     color: white;
 }
 
