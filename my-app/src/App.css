@@ -74,6 +74,17 @@ div {
     margin: 30px;
 }
 
+.challenges-box {
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 20px auto;
+    width: 50rem;
+    text-align: center;
+}
+
+
 .footer{
     display: flex;
     justify-content: space-between;
