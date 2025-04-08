@@ -1,6 +1,5 @@
 .resource-page {
     text-align: center;
-    font-family: sans-serif;
     padding: 40px;
 }
 
@@ -21,7 +20,7 @@
     padding: 12px;
     font-size: 16px;
     font-weight: bold;
-    background-color: #007176;
+    background-color:  #007176;
     color: white;
     border: none;
     cursor: pointer;
