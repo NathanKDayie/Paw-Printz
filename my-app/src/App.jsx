@@ -32,6 +32,10 @@ function Home() {
       <h1>Welcome to Paw Printz!</h1>
       <p> This is the home page </p>
       <Checkbox />
+       {/* í±‰ Challenges Box */}
+      <div className="challenges-box">
+        <h2>Challenges</h2>
+      </div>
       <div className="pet-container">
         <img src={neutral}></img>
       </div>
@@ -74,3 +78,4 @@ function Footer() {
 }
 
 export default App
+
