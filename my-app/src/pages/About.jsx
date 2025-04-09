@@ -34,7 +34,7 @@ const About = () => {
                                 </div>
                             </a>
                             <div className="dev-info">
-                                <h2>Kellee Palmer</h2>
+                                <h3>Kellee Palmer</h3>
                                 <p>CS UMBC '26</p>
                                 <p>Lead Developer Scrum Master Frontend Developer UX/UI Designer</p>
                             </div>
@@ -47,7 +47,7 @@ const About = () => {
                                 </div>
                             </a>
                             <div className="dev-info">
-                                <h2>Papa Manu</h2>
+                                <h3>Papa Manu</h3>
                                 <p>CS UMBC '26</p>
                                 <p>Frontend & Backend Developer</p>
                             </div>
@@ -60,7 +60,7 @@ const About = () => {
                                 </div>
                             </a>
                             <div className="dev-info">
-                                <h2>Nathan Dayie</h2>
+                                <h3>Nathan Dayie</h3>
                                 <p>CS UMBC '26</p>
                                 <p>Backend Developer & Tester</p>
                             </div>
@@ -73,7 +73,7 @@ const About = () => {
                                 </div>
                             </a>
                             <div className="dev-info">
-                                <h2>Laurenz Millin</h2>
+                                <h3>Laurenz Millin</h3>
                                 <p>CS UMBC '26</p>
                                 <p>Backend Developer & Tester</p>
                             </div>
@@ -91,9 +91,9 @@ const About = () => {
                             </a>
                         </div>
                         <div className="dev-info">
-                            <h2>Jay Gepilano</h2>
+                            <h3>Jay Gepilano</h3>
                             <p>CS UMBC '27</p>
-                            <p>UI/UX Designer</p>
+                            <p>UI/UX Design</p>
                         </div>
                     </div>
                 </div>

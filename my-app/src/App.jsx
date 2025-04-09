@@ -10,7 +10,7 @@ import './App.css'
 
 function App() {
   return (
-    <div>
+    <div className="app-container">
       <Nav />
       <div className="container">
         <Routes>
@@ -29,15 +29,17 @@ function App() {
 function Home() {
   return (
     <div>
-      <h1>Welcome to Paw Printz!</h1>
-      <p> This is the home page </p>
-      <Checkbox />
-       {/* í±‰ Challenges Box */}
-      <div className="challenges-box">
-        <h2>Challenges</h2>
-      </div>
-      <div className="pet-container">
-        <img src={neutral}></img>
+      <div className='home-container'>
+        <div className="challenges-box">
+          <h2>Challenges</h2>
+          <Checkbox />
+        </div>
+        <div className="pet-container">
+          <img src={neutral} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}></img>
+        </div>
+        <div className="text-box">
+          <h2>Text</h2>
+        </div>
       </div>
     </div>
   )
