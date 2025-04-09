@@ -5,6 +5,7 @@ import Logs from './pages/Logs'
 import Store from './pages/Store'
 import ResourcePage from './pages/ResourcePage'
 import About from './pages/About'
+import neutral from './assets/chip-neutral.png'
 import './App.css'
 
 function App() {
@@ -32,7 +33,7 @@ function Home() {
       <p> This is the home page </p>
       <Checkbox />
       <div className="pet-container">
-        <></>
+        <img src={neutral}></img>
       </div>
     </div>
   )
