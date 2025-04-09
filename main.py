@@ -1,32 +1,100 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
+import os
 
 points = 0
+counter = 0
+
+start_time_file = "start_time.txt"
+
 
 def detect_mood(user_input):
     if user_input.lower().startswith("not"):
         return "sad"
     happy_keywords = {
         "happy": [
-            "happy", "joyful", "excited", "content", "glad", "cheerful",
-            "thrilled", "delighted", "ecstatic", "elated", "satisfied",
-            "grateful", "hopeful", "optimistic", "overjoyed", "great", "good",
-            "nice", "awesome", "fantastic", "wonderful", "amazing", "fabulous",
-            "incredible", "superb", "excellent", "positive", "uplifting",
-            "energetic", "enthusiastic", "motivated", "inspired",
-            "playful", "fun", "jovial", "lighthearted", "bubbly",
-            "radiant", "sparkling", "sunny", "bright", "cheery",
-            "smiling", "laughing", "joking", "silly", "playful",
+            "happy",
+            "joyful",
+            "excited",
+            "content",
+            "glad",
+            "cheerful",
+            "thrilled",
+            "delighted",
+            "ecstatic",
+            "elated",
+            "satisfied",
+            "grateful",
+            "hopeful",
+            "optimistic",
+            "overjoyed",
+            "great",
+            "good",
+            "nice",
+            "awesome",
+            "fantastic",
+            "wonderful",
+            "amazing",
+            "fabulous",
+            "incredible",
+            "superb",
+            "excellent",
+            "positive",
+            "uplifting",
+            "energetic",
+            "enthusiastic",
+            "motivated",
+            "inspired",
+            "playful",
+            "fun",
+            "jovial",
+            "lighthearted",
+            "bubbly",
+            "radiant",
+            "sparkling",
+            "sunny",
+            "bright",
+            "cheery",
+            "smiling",
+            "laughing",
+            "joking",
+            "silly",
+            "playful",
         ],
         "neutral":
         ["okay", "fine", "alright", "meh", "so-so", "neutral", "cool", "ok"],
         "sad": [
-            "sad", "upset", "down", "depressed", "unhappy", "miserable",
-            "gloomy", "heartbroken", "not feeling well",
-            "bad", "terrible", "awful", "angry", "frustrated", "disappointed",
-            "stressed", "anxious", "worried", "nervous", "fearful",
-            "hopeless", "lonely", "isolated", "lost", "confused", "helpless",
-            "overwhelmed", "exhausted", "fatigued", "drained", "weary",
+            "sad",
+            "upset",
+            "down",
+            "depressed",
+            "unhappy",
+            "miserable",
+            "gloomy",
+            "heartbroken",
+            "not feeling well",
+            "bad",
+            "terrible",
+            "awful",
+            "angry",
+            "frustrated",
+            "disappointed",
+            "stressed",
+            "anxious",
+            "worried",
+            "nervous",
+            "fearful",
+            "hopeless",
+            "lonely",
+            "isolated",
+            "lost",
+            "confused",
+            "helpless",
+            "overwhelmed",
+            "exhausted",
+            "fatigued",
+            "drained",
+            "weary",
         ]
     }
 
@@ -96,9 +164,13 @@ def get_response(mood):
 
 def chatbot():
     global points
+    global counter
     conversation_history = []
     pet_name = input("What is your pet's name? ")
     print(f"\nNice to meet you! I'm {pet_name}, your mood companion! 🐾\n")
+    print(
+        "\nType 'challenges' to get a challenge, 'check points' to see your points, and 'complete' to claim your reward!\n"
+    )
 
     while True:
         user_input = input(
@@ -118,6 +190,32 @@ def chatbot():
         if user_input.lower() == 'check points':
             print(f"\nYou have {points} points! Keep up the good work! 🌟")
             continue
+        if user_input.lower() == 'challenges':
+            get_challenge()
+            continue
+        # Check if the start time file exists
+        if os.path.exists(start_time_file):
+            with open(start_time_file, "r") as file:
+                start_time_str = file.read().strip()
+                start_time = datetime.strptime(start_time_str,
+                                               "%Y-%m-%d %H:%M:%S")
+                # Check if 24 hours have passed
+                if datetime.now() - start_time >= timedelta(hours=24):
+                    points += 50
+                    print(
+                        f"\nYou have earned 50 points for logging in today! You now have {points} points! 🌟"
+                    )
+
+                    # Update the start time to the current time
+                    with open(start_time_file, "w") as file:
+                        file.write(
+                            datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        else:
+            # Create the start time file with the current time
+            with open(start_time_file, "w") as file:
+                file.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
         mood = detect_mood(user_input)
         if mood:
             response, follow_up, resource = get_response(mood)
@@ -133,7 +231,9 @@ def chatbot():
             print(
                 "\nI'm not quite sure how to interpret that, but I'm here to listen! 💭"
             )
-        get_challenge()
+        if points % 1000 == 0 and points != 0:
+            print(f"\nCongratulations! You have recieved {points} points and have reached level {points / 1000} .")
+
 
 def challenges():
     challenges = [
@@ -143,6 +243,7 @@ def challenges():
     ]
     return random.choice(challenges)
 
+
 def get_challenge():
     challenge = challenges()
     print(f"\nHere's a challenge for you: {challenge}")
@@ -151,11 +252,17 @@ def get_challenge():
         print("Great! Let's work on this together! Type your anser below:")
         answer = input()
         print(f"Your answer: {answer}")
-        print("\nThat's a thoughtful response! 😊 Type complete to claim your reward!")
+        print(
+            "\nThat's a thoughtful response! 😊 Type complete to claim your reward!"
+        )
     else:
         print("No worries! You can always come back to it later. 😊")
+
+
 def get_points():
     return points
 
+
 if __name__ == "__main__":
     chatbot()
+
