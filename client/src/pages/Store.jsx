@@ -1,17 +1,27 @@
-import React from 'react';
-import '../App.css'
+import React from 'react'; 
+import './Store.css'; 
 
 const Store = () => {
     return (
-        <div>
-            <p>This is the store page</p>
+        <div className="store-container">
+            <h1 className="store-title">Paw Printz Store</h1>
+            <p className="store-description">Spend your points to unlock goodies for your pet!</p>
 
-            <ul>
-                <li>Pet collar: 500 points</li>
+            <ul className="store-items">
+                <li className="store-item">
+                    <span className="item-name">Pet collar</span>
+                    <span className="item-price">500 points</span>
+                </li>
 
-                <li>Custom pet collar: 750 points</li>
+                <li className="store-item">
+                    <span className="item-name">Custom pet collar</span>
+                    <span className="item-price">750 points</span>
+                </li>
 
-                <li>Chew toy: 1000 points</li>
+                <li className="store-item">
+                    <span className="item-name">Chew toy</span>
+                    <span className="item-price">1000 points</span>
+                </li>
             </ul>
         </div>
     );
