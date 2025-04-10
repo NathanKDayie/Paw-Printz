@@ -6,11 +6,14 @@ import Store from './pages/Store'
 import ResourcePage from './pages/ResourcePage'
 import About from './pages/About'
 import neutral from './assets/chip-neutral.png'
+import happy from './assets/chip-happy.png'
+import sad from './assets/chip-sad.png'
+import background from './assets/mdflagbg.jpg'
 import './App.css'
 
 function App() {
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ backgroundImage: `url(${background}` }}>
       <Nav />
       <div className="container">
         <Routes>
