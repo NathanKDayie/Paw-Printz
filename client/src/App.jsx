@@ -28,8 +28,14 @@ function App() {
 
 function Home() {
   return (
-    <div>
-      <div className='home-container'>
+    <div className='home-container'>
+      <div className='user-level'>
+      <span className="level-circle">1</span>
+        <div className='progress-bar'>
+          <span style={{width: '10%'}}></span>
+        </div>
+      </div>
+      <div className='home-content'>
         <div className="challenges-box">
           <h2>Challenges</h2>
           <Checkbox />

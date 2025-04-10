@@ -1,5 +1,5 @@
 import React from 'react';
-import '../App.css'
+import './About.css';
 import kellee from '../assets/kellee.png';
 import papa from '../assets/papa.png';
 import laurenz from '../assets/laurenz.png';
