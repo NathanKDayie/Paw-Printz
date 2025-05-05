@@ -136,6 +136,10 @@ function Home() {
     setFollowUp(followUps[mood]?.[Math.floor(Math.random() * followUps[mood].length)] || '');
 
     setUserInput(''); // Clear the input field
+
+    setTimeout(() => {
+      setPetMood(neutral); // Reset pet mood after 5 seconds
+    }, 3000);
   };
 
   const handleChallengeCheck = (index) => {

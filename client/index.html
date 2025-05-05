@@ -8,8 +8,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paw Printz</title>
+    
   </head>
   <body>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+  import { getAuth } from "firebase/auth";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDu21Pz9KvOQqwqaE4kxsAfu3PZb6EEqFI",
+    authDomain: "paw-printz.firebaseapp.com",
+    projectId: "paw-printz",
+    storageBucket: "paw-printz.firebasestorage.app",
+    messagingSenderId: "790246831663",
+    appId: "1:790246831663:web:1788c0e63e21be3cae38da",
+    measurementId: "G-W3CME8Z3J5"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+
+</script>
     <div id="root"></div>
     <script type="module" src="src/main.jsx"></script>
   </body>
