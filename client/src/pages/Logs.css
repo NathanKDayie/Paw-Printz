@@ -1,0 +1,13 @@
+.logs-container {
+  margin: 2rem;
+  text-align: left;
+}
+
+.mood-group {
+  margin-bottom: 1.5rem;
+}
+
+.mood-group h3 {
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
