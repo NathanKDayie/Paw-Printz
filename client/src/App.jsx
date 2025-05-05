@@ -106,6 +106,14 @@ function Home() {
 
   const handleSubmit = () => {
     const mood = detectMood(userInput);
+    const date = new Date().toLocaleDateString();
+
+    
+    // Save the entry
+    const newEntry = { mood, date };
+    const existingLogs = JSON.parse(localStorage.getItem('moodLogs')) || [];
+    localStorage.setItem('moodLogs', JSON.stringify([...existingLogs, newEntry]));   
+
     if (mood === 'happy') {
       setResponse("That's wonderful! 😊 I'm so happy to hear you're feeling good!");
       setPetMood(happy);
