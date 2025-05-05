@@ -37,11 +37,13 @@ function Home() {
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
 
-  const challenges = [
+  const initialChallenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
     "How can we better support each other during tough times?",
   ];
+
+  const [challenges, setChallenges] = useState(initialChallenges);
 
   const resources = {
     happy: ["Keep up the positive vibes! 😊"],
@@ -128,6 +130,10 @@ function Home() {
     setUserInput(''); // Clear the input field
   };
 
+  const handleChallengeCheck = (index) => {
+    setChallenges(prev => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <div className='home-container'>
       <div className='user-level'>
@@ -139,7 +145,16 @@ function Home() {
       <div className='home-content'>
         <div className="challenges-box">
           <h2>Challenges</h2>
-          <p>{challenge}</p>
+          <ul>
+            {challenges.map((item, index) => (
+              <li key={index} className="challenge-item">
+                <label className="checkbox-label">
+                  <span>{item}</span>
+                  <input type="checkbox" onChange={() => handleChallengeCheck(index)} />
+                </label>
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="pet-container">
           <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
@@ -159,25 +174,6 @@ function Home() {
         </div>
       </div>
     </div>
-  );
-}
-
-function Checkbox() {
-  const [visible, setVisible] = useState(true);
-
-  return (
-    <>
-      {visible && (
-        <div className="check-box">
-          <label htmlFor="check">Mark as Complete</label>
-          <input
-            type="checkbox"
-            id="check"
-            onClick={() => setVisible(false)}
-          />
-        </div>
-      )}
-    </>
   );
 }
 
