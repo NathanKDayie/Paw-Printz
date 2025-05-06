@@ -1,15 +1,15 @@
-import {Route, Routes, } from 'react-router-dom'
-import {useState} from 'react'
-import Nav from './Nav'
-import Logs from './pages/Logs'
-import Store from './pages/Store'
-import ResourcePage from './pages/ResourcePage'
-import About from './pages/About'
-import neutral from './assets/chip-neutral.png'
-import happy from './assets/chip-happy.png'
-import sad from './assets/chip-sad.png'
-import background from './assets/mdflagbg.jpg'
-import './App.css'
+import { Route, Routes } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import Nav from './Nav';
+import Logs from './pages/Logs';
+import Store from './pages/Store';
+import ResourcePage from './pages/ResourcePage';
+import About from './pages/About';
+import neutral from './assets/chip-neutral.png';
+import happy from './assets/chip-happy.png';
+import sad from './assets/chip-sad.png';
+import background from './assets/mdflagbg.jpg';
+import './App.css';
 
 function App() {
   return (
@@ -17,16 +17,16 @@ function App() {
       <Nav />
       <div className="container">
         <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/logs" element={<Logs />} />
-            <Route path="/store" element={<Store />} />
-            <Route path="/resourcepage" element={<ResourcePage />} />
-            <Route path="/about" element={<About />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/logs" element={<Logs />} />
+          <Route path="/store" element={<Store />} />
+          <Route path="/resourcepage" element={<ResourcePage />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
-      <Footer/>
+      <Footer />
     </div>
-  )
+  );
 }
 
 function Home() {
@@ -36,26 +36,27 @@ function Home() {
   const [challenge, setChallenge] = useState('');
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
+  const [points, setPoints] = useState(() => parseInt(localStorage.getItem('points')) || 0);
+  const [challengeAnswer, setChallengeAnswer] = useState('');
 
-  const initialChallenges = [
+  const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
     "How can we better support each other during tough times?",
   ];
 
-  const [challenges, setChallenges] = useState(initialChallenges);
-
   const resources = {
-    happy: ["Keep up the positive vibes! 😊"],
+    happy: [
+      "https://www.positivityblog.com",
+      "https://www.happify.com",
+    ],
     neutral: [
-      "Here's a funny video to improve your mood: https://www.youtube.com/watch?v=orK3Ug_DHOM",
-      "Try reading your favorite book. 📚",
-      "Check out this playlist of random upbeat songs: https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN",
+      "https://www.youtube.com/watch?v=orK3Ug_DHOM",
+      "https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN",
     ],
     sad: [
-      "Here's a video of baby animals to lift your spirits: https://www.youtube.com/watch?v=kj1-rR3udNs",
-      "Give RIH a call at 410-455-2542 and seek counseling service if you need it!",
-      "Check out this website that could help you deal with negative emotions: https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad",
+      "https://www.youtube.com/watch?v=kj1-rR3udNs",
+      "https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad",
     ],
   };
 
@@ -77,45 +78,26 @@ function Home() {
     ],
   };
 
+  useEffect(() => {
+    localStorage.setItem('points', points);
+  }, [points]);
+
   const detectMood = (input) => {
-    if (input.toLowerCase().startsWith('not')) {
-      return 'sad';
-    }
-    const happyKeywords = [
-      'happy', 'joyful', 'excited', 'content', 'glad', 'cheerful', 'thrilled',
-      'delighted', 'ecstatic', 'elated', 'satisfied', 'grateful', 'hopeful',
-      'optimistic', 'overjoyed', 'great', 'good', 'nice', 'awesome', 'fantastic',
-      'wonderful', 'amazing', 'fabulous', 'incredible', 'superb', 'excellent',
-      'positive', 'uplifting', 'energetic', 'enthusiastic', 'motivated', 'inspired',
-      'playful', 'fun', 'jovial', 'lighthearted', 'bubbly', 'radiant', 'sparkling',
-      'sunny', 'bright', 'cheery', 'smiling', 'laughing', 'joking', 'silly', 'playful',
-    ];
-    const neutralKeywords = ['okay', 'fine', 'alright', 'meh', 'so-so', 'neutral', 'cool', 'ok'];
-    const sadKeywords = [
-      'sad', 'upset', 'down', 'depressed', 'unhappy', 'miserable', 'gloomy',
-      'heartbroken', 'not feeling well', 'bad', 'terrible', 'awful', 'angry',
-      'frustrated', 'disappointed', 'stressed', 'anxious', 'worried', 'nervous',
-      'fearful', 'hopeless', 'lonely', 'isolated', 'lost', 'confused', 'helpless',
-      'overwhelmed', 'exhausted', 'fatigued', 'drained', 'weary',
-    ];
+    if (input.toLowerCase().startsWith('not')) return 'sad';
+
+    const happyKeywords = ['happy', 'joyful', 'glad', 'awesome', 'great', 'excited'];
+    const neutralKeywords = ['okay', 'fine', 'meh', 'neutral'];
+    const sadKeywords = ['sad', 'upset', 'bad', 'depressed', 'unhappy'];
 
     const words = input.toLowerCase().split(' ');
-    if (words.some((word) => happyKeywords.includes(word))) return 'happy';
-    if (words.some((word) => neutralKeywords.includes(word))) return 'neutral';
-    if (words.some((word) => sadKeywords.includes(word))) return 'sad';
+    if (words.some(word => happyKeywords.includes(word))) return 'happy';
+    if (words.some(word => neutralKeywords.includes(word))) return 'neutral';
+    if (words.some(word => sadKeywords.includes(word))) return 'sad';
     return null;
   };
 
   const handleSubmit = () => {
     const mood = detectMood(userInput);
-    const date = new Date().toLocaleDateString();
-
-    
-    // Save the entry
-    const newEntry = { mood, date };
-    const existingLogs = JSON.parse(localStorage.getItem('moodLogs')) || [];
-    localStorage.setItem('moodLogs', JSON.stringify([...existingLogs, newEntry]));   
-
     if (mood === 'happy') {
       setResponse("That's wonderful! 😊 I'm so happy to hear you're feeling good!");
       setPetMood(happy);
@@ -130,20 +112,20 @@ function Home() {
       setPetMood(neutral);
     }
 
-    // Set a random challenge, resource, and follow-up question
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
     setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
     setFollowUp(followUps[mood]?.[Math.floor(Math.random() * followUps[mood].length)] || '');
-
-    setUserInput(''); // Clear the input field
-
-    setTimeout(() => {
-      setPetMood(neutral); // Reset pet mood after 5 seconds
-    }, 3000);
+    setUserInput('');
   };
 
-  const handleChallengeCheck = (index) => {
-    setChallenges(prev => prev.filter((_, i) => i !== index));
+  const handleChallengeSubmit = () => {
+    if (challengeAnswer.trim() !== '') {
+      setPoints(points + 50);
+      setChallengeAnswer('');
+      alert('Challenge completed! You earned 50 points!');
+    } else {
+      alert('Please provide an answer to the challenge.');
+    }
   };
 
   return (
@@ -151,22 +133,21 @@ function Home() {
       <div className='user-level'>
         <span className="level-circle">1</span>
         <div className='progress-bar'>
-          <span style={{ width: '10%' }}></span>
+          <span style={{ width: `${(points % 100) || 10}%` }}></span>
         </div>
+        <p>Points: {points}</p>
       </div>
       <div className='home-content'>
         <div className="challenges-box">
           <h2>Challenges</h2>
-          <ul>
-            {challenges.map((item, index) => (
-              <li key={index} className="challenge-item">
-                <label className="checkbox-label">
-                  <span>{item}</span>
-                  <input type="checkbox" onChange={() => handleChallengeCheck(index)} />
-                </label>
-              </li>
-            ))}
-          </ul>
+          <p>{challenge}</p>
+          <input
+            type="text"
+            value={challengeAnswer}
+            onChange={(e) => setChallengeAnswer(e.target.value)}
+            placeholder="Type your answer here..."
+          />
+          <button onClick={handleChallengeSubmit}>Submit Answer</button>
         </div>
         <div className="pet-container">
           <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
@@ -197,8 +178,7 @@ function Footer() {
         <p><a href="https://health.umbc.edu" target="_blank">RIH</a></p>
       </ul>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;
