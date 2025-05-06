@@ -36,8 +36,12 @@ function Home() {
   const [challenge, setChallenge] = useState('');
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
-  const [points, setPoints] = useState(() => parseInt(localStorage.getItem('points')) || 0);
   const [challengeAnswer, setChallengeAnswer] = useState('');
+
+  const [xp, setXp] = useState(() => parseInt(localStorage.getItem('xp')) || 0);
+  const level = Math.floor(xp / 100);
+  const xpToNextLevel = 100;
+  const xpProgress = xp % xpToNextLevel;
 
   const challenges = [
     "How do you think technology can help improve mental health?",
@@ -79,64 +83,70 @@ function Home() {
   };
 
   useEffect(() => {
-    localStorage.setItem('points', points);
-  }, [points]);
+    localStorage.setItem('xp', xp);
+  }, [xp]);
 
   const detectMood = (input) => {
     if (input.toLowerCase().startsWith('not')) return 'sad';
 
-    const happyKeywords = ['happy', 'joyful', 'glad', 'awesome', 'great', 'excited'];
-    const neutralKeywords = ['okay', 'fine', 'meh', 'neutral'];
-    const sadKeywords = ['sad', 'upset', 'bad', 'depressed', 'unhappy'];
+    const happyKeywords = ['happy', 'joyful', 'excited', 'content', 'glad', 'awesome', 'good', 'great'];
+    const neutralKeywords = ['okay', 'fine', 'meh', 'neutral', 'alright'];
+    const sadKeywords = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed'];
 
     const words = input.toLowerCase().split(' ');
+
     if (words.some(word => happyKeywords.includes(word))) return 'happy';
     if (words.some(word => neutralKeywords.includes(word))) return 'neutral';
     if (words.some(word => sadKeywords.includes(word))) return 'sad';
+
     return null;
   };
 
   const handleSubmit = () => {
     const mood = detectMood(userInput);
+    let moodImage = neutral;
+
     if (mood === 'happy') {
       setResponse("That's wonderful! 😊 I'm so happy to hear you're feeling good!");
-      setPetMood(happy);
+      moodImage = happy;
     } else if (mood === 'neutral') {
       setResponse("That's okay! Everyone has those neutral days. 😊");
-      setPetMood(neutral);
+      moodImage = neutral;
     } else if (mood === 'sad') {
       setResponse("I'm here for you during this tough time. Things will get better soon.");
-      setPetMood(sad);
+      moodImage = sad;
     } else {
       setResponse("I'm not quite sure how to interpret that, but I'm here to listen! 💭");
-      setPetMood(neutral);
+      moodImage = neutral;
     }
 
-    setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
-    setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
+    setPetMood(moodImage);
     setFollowUp(followUps[mood]?.[Math.floor(Math.random() * followUps[mood].length)] || '');
+    setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
+    setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
     setUserInput('');
   };
 
   const handleChallengeSubmit = () => {
-    if (challengeAnswer.trim() !== '') {
-      setPoints(points + 50);
+    if (challengeAnswer.trim()) {
+      setXp(prev => prev + 50);
       setChallengeAnswer('');
-      alert('Challenge completed! You earned 50 points!');
+      alert('Challenge completed! You earned 50 XP!');
     } else {
-      alert('Please provide an answer to the challenge.');
+      alert('Please enter your challenge answer.');
     }
   };
 
   return (
     <div className='home-container'>
       <div className='user-level'>
-        <span className="level-circle">1</span>
+        <span className="level-circle">{level}</span>
         <div className='progress-bar'>
-          <span style={{ width: `${(points % 100) || 10}%` }}></span>
+          <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
         </div>
-        <p>Points: {points}</p>
+        <p>XP: {xp} / {level * 100 + 100}</p>
       </div>
+
       <div className='home-content'>
         <div className="challenges-box">
           <h2>Challenges</h2>
@@ -149,9 +159,11 @@ function Home() {
           />
           <button onClick={handleChallengeSubmit}>Submit Answer</button>
         </div>
+
         <div className="pet-container">
-          <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+          <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%' }} />
         </div>
+
         <div className="text-box">
           <h2>How are you feeling today?</h2>
           <input
