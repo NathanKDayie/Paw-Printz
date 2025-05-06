@@ -246,3 +246,21 @@ div {
   .checkbox-label input[type="checkbox"]:checked::before {
     transform: scale(1);
   }
+
+  .circle-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .circle-button:hover {
+    background-color: #1573df;
+    transition: background-color 0.3s ease;
+  }

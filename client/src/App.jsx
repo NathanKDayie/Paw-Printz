@@ -1,5 +1,5 @@
 import {Route, Routes, } from 'react-router-dom'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import Nav from './Nav'
 import Logs from './pages/Logs'
 import Store from './pages/Store'
@@ -9,11 +9,13 @@ import neutral from './assets/chip-neutral.png'
 import happy from './assets/chip-happy.png'
 import sad from './assets/chip-sad.png'
 import background from './assets/mdflagbg.jpg'
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import './App.css'
 
 function App() {
+
   return (
-    <div className="app-container" style={{ backgroundImage: `url(${background}` }}>
+    <div className="app-container" style={{ backgroundImage: `url(${background})` }}>
       <Nav />
       <div className="container">
         <Routes>
@@ -36,6 +38,17 @@ function Home() {
   const [challenge, setChallenge] = useState('');
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
+  
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
+      setUser(currUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const initialChallenges = [
     "How do you think technology can help improve mental health?",
@@ -172,7 +185,7 @@ function Home() {
           <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
         </div>
         <div className="text-box">
-          <h2>How are you feeling today?</h2>
+        {user ? <h2>Hi {user.displayName}, Welcome to PawPrintz!</h2> : <h2>Welcome to PawPrintz!</h2>}
           <input
             type="text"
             value={userInput}
