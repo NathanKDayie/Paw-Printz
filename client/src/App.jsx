@@ -136,6 +136,9 @@ function Home() {
     setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
     setUserInput('');
+    setTimeout(() => {
+      setPetMood(neutral);
+    }, 3000);
   };
 
   const handleChallengeSubmit = () => {
@@ -143,6 +146,7 @@ function Home() {
       setXp(prev => prev + 50);
       setChallengeAnswer('');
       alert('Challenge completed! You earned 50 XP!');
+      setPetMood(happy);
     } else {
       alert('Please enter your challenge answer.');
     }
