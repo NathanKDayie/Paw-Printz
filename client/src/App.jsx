@@ -9,7 +9,10 @@ import neutral from './assets/chip-neutral.png';
 import happy from './assets/chip-happy.png';
 import sad from './assets/chip-sad.png';
 import background from './assets/mdflagbg.jpg';
+import goldCoin from './assets/goldcoin.png';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { ref, set, get, child, getDatabase } from "firebase/database";
+import { database } from "./firebaseConfig.js";
 import './App.css';
 
 function App() {
@@ -44,16 +47,66 @@ function Home() {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (currUser) => {
-      setUser(currUser);
+      const handleAuth = async () => {
+        if (currUser) {
+          setUser(currUser);
+
+          const dbRef = ref(database);
+          try {
+            const snapshot = await get(child(dbRef, `users/${currUser.uid}/xp`));
+            if (snapshot.exists()) {
+              setXp(snapshot.val());
+            }
+          } catch (error) {
+            console.error("Error loading XP:", error);
+          }
+        } else {
+          setUser(null);
+        }
+      };
+      handleAuth();
     });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
   }, []);
-  const [xp, setXp] = useState(() => parseInt(localStorage.getItem('xp')) || 0);
+
+  const [xp, setXp] = useState(0);
+  const [coins, setCoins] = useState(0);
   const level = Math.floor(xp / 100);
   const xpToNextLevel = 100;
   const xpProgress = xp % xpToNextLevel;
 
+  const gainXp = () => {
+    const newXp = xp + 50;
+    setXp(newXp);
+    if (newXp >= level * 100 + 100) {
+      const addCoins = coins + 50;
+      const addLevel = level + 1;
+      alert(`Congratulations! You've leveled up to level ${level + 1}! Here's 50 coins!`);
+      const userCoinsRef = ref(database, `users/${user ? user.uid : "Program Tester"}/coins`);
+      const userLevelRef = ref(database, `users/${user ? user.uid : "Program Tester"}/level`);
+      set(userLevelRef, addLevel).then(() => {
+        console.log("Level saved successfully!: ", level + 1);
+      }).catch((error) => {
+        console.error("Error saving level:", error);
+      });
+      set(userCoinsRef, addCoins).then(() => {
+        console.log("Coins saved successfully!: ", addCoins);
+      }).catch((error) => {
+        console.error("Error saving coins:", error);
+      });
+      
+      setCoins(addCoins);
+    }
+    const userXpRef = ref(database, `users/${user ? user.uid : "Program Tester"}/xp`);
+    set(userXpRef, xp) .then(() => {
+      console.log("XP saved successfully!: ", newXp);
+    })
+    .catch((error) => {
+      console.error("Error saving XP:", error);
+    });
+    alert('Challenge completed! You earned 50 XP!');
+  };
   const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
@@ -92,10 +145,6 @@ function Home() {
       "Have you tried doing something you enjoy today?",
     ],
   };
-
-  useEffect(() => {
-    localStorage.setItem('xp', xp);
-  }, [xp]);
 
   const detectMood = (input) => {
     if (input.toLowerCase().startsWith('not')) return 'sad';
@@ -141,25 +190,31 @@ function Home() {
     }, 3000);
   };
 
-  const handleChallengeSubmit = () => {
-    if (challengeAnswer.trim()) {
-      setXp(prev => prev + 50);
-      setChallengeAnswer('');
-      alert('Challenge completed! You earned 50 XP!');
-      setPetMood(happy);
-    } else {
-      alert('Please enter your challenge answer.');
-    }
-  };
+  // const handleChallengeSubmit = () => {
+  //   if (challengeAnswer.trim()) {
+  //     setXp(prev => prev + 50);
+  //     setChallengeAnswer('');
+  //     alert('Challenge completed! You earned 50 XP!');
+  //     setPetMood(happy);
+  //   } else {
+  //     alert('Please enter your challenge answer.');
+  //   }
+  // };
 
   return (
     <div className='home-container'>
-      <div className='user-level'>
-        <span className="level-circle">{level}</span>
-        <div className='progress-bar'>
-          <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
+      <div className='user-info'>
+        <div className='user-level'>
+          <span className="level-circle">{level}</span>
+          <div className='progress-bar'>
+            <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
+          </div>
+          <p>XP: {xp} / {level * 100 + 100}</p>
         </div>
-        <p>XP: {xp} / {level * 100 + 100}</p>
+        <div className="coins-container">
+          <img src={goldCoin} style={{maxWidth: '40px'}}/>
+          <p>{coins}</p>
+        </div>
       </div>
 
       <div className='home-content'>
@@ -172,7 +227,7 @@ function Home() {
             onChange={(e) => setChallengeAnswer(e.target.value)}
             placeholder="Type your answer here..."
           />
-          <button onClick={handleChallengeSubmit}>Submit Answer</button>
+          <button onClick={gainXp}>Submit Answer</button>
         </div>
 
         <div className="pet-container">

@@ -9,12 +9,12 @@ const Store = () => {
 
             <ul className="store-items">
                 <li className="store-item">
-                    <span className="item-name">Pet collar</span>
+                    <span className="item-name">UMBC Background</span>
                     <span className="item-price">500 points</span>
                 </li>
 
                 <li className="store-item">
-                    <span className="item-name">Custom pet collar</span>
+                    <span className="item-name">Forest Background</span>
                     <span className="item-price">750 points</span>
                 </li>
 
