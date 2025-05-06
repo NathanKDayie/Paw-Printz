@@ -12,7 +12,7 @@ const ResourcePage = () => {
 
     return (
         <div>
-            <h1 className="headers">Resources</h1>
+            <h1 className="headers">Resource Hub</h1>
             <div className= "resource-page">
                 <div className="dropdown-container">
                     {resourceData.map((resource) => (

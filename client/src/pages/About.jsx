@@ -5,13 +5,14 @@ import papa from '../assets/papa.png';
 import laurenz from '../assets/laurenz.png';
 import nathan from '../assets/nathan.png';
 import jay from '../assets/jay.png';
+import pawprint from '../assets/pawprint.png';
 
 const About = () => {
     return (
         <div className="about-container">
             <div className="about-text">
-                <h1 className="headers">Built by UMBC Students,</h1>
-                <h2 className="headers" style={{ paddingBottom: '40px' }}>for UMBC Students.</h2>
+                <h1 className="headers">Built for UMBC Students,</h1>
+                <h2 className="headers" style={{ paddingBottom: '40px' }}> by UMBC Students </h2>
                 <p className="about-paragraphs"> 
                     As UMBC students, we know how overwhelming student life can be.
                     With the stress of classes, exams, and the pressures of daily life, 
@@ -24,7 +25,9 @@ const About = () => {
                 </p>
             </div>
             <div className="dev-container">
-                <h1 className="headers" style={{ padding: '20px', paddingBottom: '20px', justifyContent: 'right' }}>Meet the Developers</h1>
+                <h1 className="headers" style={{ padding: '20px', paddingBottom: '20px', justifyContent: 'right' }}>
+                    Meet the Developers
+                </h1>
                 <div className="about-images">
                     <div className="image-grid">
                         <div className="dev-wrapper">
@@ -36,7 +39,7 @@ const About = () => {
                             <div className="dev-info">
                                 <h3>Kellee Palmer</h3>
                                 <p>CS UMBC '26</p>
-                                <p>Lead Developer Scrum Master Frontend Developer UX/UI Designer</p>
+                                <p>Scrum Master Frontend Developer & UX/UI Designer</p>
                             </div>
                         </div>
 

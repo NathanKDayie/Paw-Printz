@@ -15,8 +15,12 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, set, get, child } from "firebase/database";
 import { database } from "./firebaseConfig";
 import { getAIResponse } from './api/localai';
+import background from './assets/mdflagbg.jpg';
+import './App.css';
+
 
 function App() {
+
   return (
     <div className="app-container" style={{ backgroundImage: `url(${background})` }}>
       <Nav />
@@ -56,6 +60,37 @@ function Home() {
   const xpToNextLevel = 100;
   const xpProgress = xp % xpToNextLevel;
 
+  const gainXp = () => {
+    const newXp = xp + 50;
+    setXp(newXp);
+    if (newXp >= level * 100 + 100) {
+      const addCoins = coins + 50;
+      const addLevel = level + 1;
+      alert(`Congratulations! You've leveled up to level ${level + 1}! Here's 50 coins!`);
+      const userCoinsRef = ref(database, `users/${user ? user.uid : "Program Tester"}/coins`);
+      const userLevelRef = ref(database, `users/${user ? user.uid : "Program Tester"}/level`);
+      set(userLevelRef, addLevel).then(() => {
+        console.log("Level saved successfully!: ", level + 1);
+      }).catch((error) => {
+        console.error("Error saving level:", error);
+      });
+      set(userCoinsRef, addCoins).then(() => {
+        console.log("Coins saved successfully!: ", addCoins);
+      }).catch((error) => {
+        console.error("Error saving coins:", error);
+      });
+      
+      setCoins(addCoins);
+    }
+    const userXpRef = ref(database, `users/${user ? user.uid : "Program Tester"}/xp`);
+    set(userXpRef, xp) .then(() => {
+      console.log("XP saved successfully!: ", newXp);
+    })
+    .catch((error) => {
+      console.error("Error saving XP:", error);
+    });
+    alert('Challenge completed! You earned 50 XP!');
+  };
   const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
@@ -100,6 +135,7 @@ function Home() {
     const neutral = ['okay', 'fine', 'meh', 'neutral', 'alright'];
     const sad = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed'];
     const words = input.toLowerCase().split(' ');
+
     if (words.some(w => happy.includes(w))) return 'happy';
     if (words.some(w => neutral.includes(w))) return 'neutral';
     if (words.some(w => sad.includes(w))) return 'sad';
@@ -127,6 +163,7 @@ function Home() {
     setLoading(false);
 
     const mood = detectMood(userInput);
+
     setPetMood(moodToPetImage[mood] || neutral);
     const today = new Date().toISOString().split('T')[0];
     const logs = JSON.parse(localStorage.getItem('moodLogs')) || [];
@@ -158,6 +195,17 @@ function Home() {
       alert('Please enter your challenge answer.');
     }
   };
+
+  // const handleChallengeSubmit = () => {
+  //   if (challengeAnswer.trim()) {
+  //     setXp(prev => prev + 50);
+  //     setChallengeAnswer('');
+  //     alert('Challenge completed! You earned 50 XP!');
+  //     setPetMood(happy);
+  //   } else {
+  //     alert('Please enter your challenge answer.');
+  //   }
+  // };
 
   return (
     <div className='home-container'>
