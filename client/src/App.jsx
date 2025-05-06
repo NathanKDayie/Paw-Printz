@@ -15,7 +15,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, set, get, child } from "firebase/database";
 import { database } from "./firebaseConfig";
 import { getAIResponse } from './api/localai';
-import background from './assets/mdflagbg.jpg';
 import './App.css';
 
 
