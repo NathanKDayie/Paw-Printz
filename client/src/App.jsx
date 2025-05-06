@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Nav from './Nav';
 import Logs from './pages/Logs';
 import Store from './pages/Store';
@@ -8,12 +8,15 @@ import About from './pages/About';
 import neutral from './assets/chip-neutral.png';
 import happy from './assets/chip-happy.png';
 import sad from './assets/chip-sad.png';
-import background from './assets/mdflagbg.jpg';
 import goldCoin from './assets/goldcoin.png';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { ref, set, get, child, getDatabase } from "firebase/database";
-import { database } from "./firebaseConfig.js";
+import background from './assets/mdflagbg.jpg';
 import './App.css';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { ref, set, get, child } from "firebase/database";
+import { database } from "./firebaseConfig";
+import { getAIResponse } from './api/localai';
+import './App.css';
+
 
 function App() {
 
@@ -36,42 +39,22 @@ function App() {
 
 function Home() {
   const [userInput, setUserInput] = useState('');
-  const [response, setResponse] = useState('');
   const [petMood, setPetMood] = useState(neutral);
   const [challenge, setChallenge] = useState('');
+  const [challengeAnswer, setChallengeAnswer] = useState('');
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
-  const [challengeAnswer, setChallengeAnswer] = useState('');
+  const [conversationState, setConversationState] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([
+    { sender: 'bot', text: 'How are you feeling today?' }
+  ]);
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
-      const handleAuth = async () => {
-        if (currUser) {
-          setUser(currUser);
-
-          const dbRef = ref(database);
-          try {
-            const snapshot = await get(child(dbRef, `users/${currUser.uid}/xp`));
-            if (snapshot.exists()) {
-              setXp(snapshot.val());
-            }
-          } catch (error) {
-            console.error("Error loading XP:", error);
-          }
-        } else {
-          setUser(null);
-        }
-      };
-      handleAuth();
-    });
-
-      return () => unsubscribe();
-  }, []);
-
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
+
+  const messageEndRef = useRef(null);
+
   const level = Math.floor(xp / 100);
   const xpToNextLevel = 100;
   const xpProgress = xp % xpToNextLevel;
@@ -114,80 +97,102 @@ function Home() {
   ];
 
   const resources = {
-    happy: [
-      "https://www.positivityblog.com",
-      "https://www.happify.com",
-    ],
-    neutral: [
-      "https://www.youtube.com/watch?v=orK3Ug_DHOM",
-      "https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN",
-    ],
-    sad: [
-      "https://www.youtube.com/watch?v=kj1-rR3udNs",
-      "https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad",
-    ],
+    happy: ["https://www.positivityblog.com", "https://www.happify.com"],
+    neutral: ["https://www.youtube.com/watch?v=orK3Ug_DHOM", "https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN"],
+    sad: ["https://www.youtube.com/watch?v=kj1-rR3udNs", "https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad"],
   };
 
   const followUps = {
-    happy: [
-      "What's the best thing that happened today?",
-      "Would you like to share what made you so happy?",
-      "That's great! How do you plan to keep this positive energy going?",
-    ],
-    neutral: [
-      "Is there something that could make your day better?",
-      "Would you like to talk about anything in particular?",
-      "Sometimes taking a short break helps. What do you think?",
-    ],
-    sad: [
-      "Would you like to talk about what's bothering you?",
-      "Is there something I can do to help you feel better?",
-      "Have you tried doing something you enjoy today?",
-    ],
+    happy: ["What's the best thing that happened today?", "Would you like to share what made you so happy?"],
+    neutral: ["Is there something that could make your day better?", "Would you like to talk about anything in particular?"],
+    sad: ["Would you like to talk about what's bothering you?", "Have you tried doing something you enjoy today?"],
   };
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (currUser) => {
+      setUser(currUser);
+      if (currUser) {
+        const uid = currUser.uid;
+        const dbRef = ref(database);
+        const xpSnap = await get(child(dbRef, `users/${uid}/xp`));
+        const coinSnap = await get(child(dbRef, `users/${uid}/coins`));
+        setXp(xpSnap.exists() ? xpSnap.val() : 0);
+        setCoins(coinSnap.exists() ? coinSnap.val() : 0);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory, loading]);
 
   const detectMood = (input) => {
     if (input.toLowerCase().startsWith('not')) return 'sad';
-
-    const happyKeywords = ['happy', 'joyful', 'excited', 'content', 'glad', 'awesome', 'good', 'great'];
-    const neutralKeywords = ['okay', 'fine', 'meh', 'neutral', 'alright'];
-    const sadKeywords = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed'];
-
+    const happy = ['happy', 'joyful', 'excited', 'glad', 'awesome', 'good', 'great'];
+    const neutral = ['okay', 'fine', 'meh', 'neutral', 'alright'];
+    const sad = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed'];
     const words = input.toLowerCase().split(' ');
 
-    if (words.some(word => happyKeywords.includes(word))) return 'happy';
-    if (words.some(word => neutralKeywords.includes(word))) return 'neutral';
-    if (words.some(word => sadKeywords.includes(word))) return 'sad';
-
-    return null;
+    if (words.some(w => happy.includes(w))) return 'happy';
+    if (words.some(w => neutral.includes(w))) return 'neutral';
+    if (words.some(w => sad.includes(w))) return 'sad';
+    return 'neutral';
   };
 
-  const handleSubmit = () => {
-    const mood = detectMood(userInput);
-    let moodImage = neutral;
+  const moodToPetImage = { happy, neutral, sad };
 
-    if (mood === 'happy') {
-      setResponse("That's wonderful! 😊 I'm so happy to hear you're feeling good!");
-      moodImage = happy;
-    } else if (mood === 'neutral') {
-      setResponse("That's okay! Everyone has those neutral days. 😊");
-      moodImage = neutral;
-    } else if (mood === 'sad') {
-      setResponse("I'm here for you during this tough time. Things will get better soon.");
-      moodImage = sad;
-    } else {
-      setResponse("I'm not quite sure how to interpret that, but I'm here to listen! 💭");
-      moodImage = neutral;
-    }
-
-    setPetMood(moodImage);
-    setFollowUp(followUps[mood]?.[Math.floor(Math.random() * followUps[mood].length)] || '');
-    setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
-    setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
+  const handleSubmit = async () => {
+    if (!userInput.trim()) return;
+    const newHistory = [...chatHistory, { sender: 'user', text: userInput }];
+    setChatHistory(newHistory);
     setUserInput('');
-    setTimeout(() => {
-      setPetMood(neutral);
-    }, 3000);
+    setLoading(true);
+    const aiResult = await getAIResponse(userInput, conversationState);
+    setChatHistory([
+      ...newHistory,
+      { sender: 'bot', text: aiResult.text },
+      aiResult.followUp && { sender: 'bot', text: `Follow-up: ${aiResult.followUp}` },
+      aiResult.resource && { sender: 'bot', text: `Resource: ${aiResult.resource.title} - ${aiResult.resource.url}` }
+    ].filter(Boolean));
+    setFollowUp(aiResult.followUp);
+    setResource(aiResult.resource ? `${aiResult.resource.title} - ${aiResult.resource.url}` : '');
+    setConversationState(aiResult.nextStep);
+    setLoading(false);
+
+    const mood = detectMood(userInput);
+
+    setPetMood(moodToPetImage[mood] || neutral);
+    const today = new Date().toISOString().split('T')[0];
+    const logs = JSON.parse(localStorage.getItem('moodLogs')) || [];
+    logs.push({ mood, date: today });
+    localStorage.setItem('moodLogs', JSON.stringify(logs));
+
+    const newXp = xp + 10;
+    setXp(newXp);
+    if (user) {
+      await set(ref(database, `users/${user.uid}/xp`), newXp);
+    }
+    setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
+  };
+
+  const handleChallengeSubmit = async () => {
+    if (challengeAnswer.trim()) {
+      const newXp = xp + 50;
+      const newCoins = coins + 50;
+      setXp(newXp);
+      setCoins(newCoins);
+      setChallengeAnswer('');
+      alert('Challenge completed! You earned 50 XP!');
+      setPetMood(happy);
+      if (user) {
+        await set(ref(database, `users/${user.uid}/xp`), newXp);
+        await set(ref(database, `users/${user.uid}/coins`), newCoins);
+      }
+    } else {
+      alert('Please enter your challenge answer.');
+    }
   };
 
   // const handleChallengeSubmit = () => {
@@ -212,7 +217,7 @@ function Home() {
           <p>XP: {xp} / {level * 100 + 100}</p>
         </div>
         <div className="coins-container">
-          <img src={goldCoin} style={{maxWidth: '40px'}}/>
+          <img src={goldCoin} alt="coins" style={{ maxWidth: '40px' }} />
           <p>{coins}</p>
         </div>
       </div>
@@ -227,7 +232,7 @@ function Home() {
             onChange={(e) => setChallengeAnswer(e.target.value)}
             placeholder="Type your answer here..."
           />
-          <button onClick={gainXp}>Submit Answer</button>
+          <button onClick={handleChallengeSubmit}>Submit Answer</button>
         </div>
 
         <div className="pet-container">
@@ -235,17 +240,33 @@ function Home() {
         </div>
 
         <div className="text-box">
-        {user ? <h2>Hi {user.displayName}, Welcome to PawPrintz!</h2> : <h2>Welcome to PawPrintz!</h2>}
+          {user ? <h2>Hi {user.displayName}, Welcome to PawPrintz!</h2> : <h2>Welcome to PawPrintz!</h2>}
+          <div className="chat-window" style={{
+            maxHeight: '400px', overflowY: 'auto', display: 'flex',
+            flexDirection: 'column', gap: '10px', padding: '10px',
+            border: '1px solid #ccc', borderRadius: '8px', marginBottom: '10px'
+          }}>
+            {chatHistory.map((msg, index) => (
+              <div key={index} style={{
+                alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                background: msg.sender === 'user' ? '#DCF8C6' : '#F1F0F0',
+                padding: '10px 14px', borderRadius: '16px',
+                maxWidth: '70%', whiteSpace: 'pre-wrap', wordBreak: 'break-word'
+              }}>
+                {msg.text}
+              </div>
+            ))}
+            {loading && <div style={{ fontStyle: 'italic' }}>Typing...</div>}
+            <div ref={messageEndRef} />
+          </div>
           <input
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
             placeholder="Type your feelings here..."
           />
-          <button onClick={handleSubmit}>Submit</button>
-          <p>{response}</p>
-          <p><strong>Follow-up:</strong> {followUp}</p>
-          <p><strong>Resource:</strong> <a href={resource} target="_blank" rel="noopener noreferrer">{resource}</a></p>
+          <button onClick={handleSubmit}>Send</button>
         </div>
       </div>
     </div>
@@ -256,8 +277,8 @@ function Footer() {
   return (
     <div className="footer">
       <ul>
-        <p><a href="https://my.umbc.edu" target="_blank">myUMBC</a></p>
-        <p><a href="https://health.umbc.edu" target="_blank">RIH</a></p>
+        <p><a href="https://my.umbc.edu" target="_blank" rel="noreferrer">myUMBC</a></p>
+        <p><a href="https://health.umbc.edu" target="_blank" rel="noreferrer">RIH</a></p>
       </ul>
     </div>
   );
