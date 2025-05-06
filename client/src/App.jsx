@@ -55,13 +55,14 @@ function Home() {
   const [user, setUser] = useState(null);
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
+  const [levelCap, setLevelCap] = useState(100);
   const [backgroundName, setBackgroundName] = useState(null);
 
   const messageEndRef = useRef(null);
 
   const level = Math.floor(xp / 100);
-  const xpToNextLevel = 100;
-  const xpProgress = xp % xpToNextLevel;
+  //const xpToNextLevel = 100;
+  const xpProgress = xp % levelCap;
 
   const challenges = [
     "How do you think technology can help improve mental health?",
@@ -121,10 +122,12 @@ function Home() {
       set(ref(database, `users/${user.uid}/xp`), newXp);
     }
 
-    if (newXp >= level * 100 + 100) {
+    if (newXp >= levelCap) {
       const newCoins = coins + 50;
       const newLevel = level + 1;
       setCoins(newCoins);
+      setLevelCap(levelCap + 100);
+      setXp(0);
       alert(`Congratulations! You've reached level ${newLevel}!`);
 
       if (user) {
@@ -193,9 +196,9 @@ function Home() {
         <div className="user-level">
           <span className="level-circle">{level}</span>
           <div className="progress-bar">
-            <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
+            <span style={{ width: `${(xpProgress / levelCap) * 100}%` }}></span>
           </div>
-          <p>XP: {xp} / {level * 100 + 100}</p>
+          <p>XP: {xp} / {levelCap}</p>
         </div>
         <div className="coins-container">
           <img src={goldCoin} alt="coins" style={{ maxWidth: '40px' }} />
