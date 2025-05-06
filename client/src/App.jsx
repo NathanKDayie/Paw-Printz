@@ -59,8 +59,8 @@ function Home() {
   const xpToNextLevel = 100;
   const xpProgress = xp % xpToNextLevel;
 
-  const gainXp = () => {
-    const newXp = xp + 50;
+  const gainXp = (earnedXp) => {
+    const newXp = xp + earnedXp;
     setXp(newXp);
     if (newXp >= level * 100 + 100) {
       const addCoins = coins + 50;
@@ -88,7 +88,6 @@ function Home() {
     .catch((error) => {
       console.error("Error saving XP:", error);
     });
-    alert('Challenge completed! You earned 50 XP!');
   };
   const challenges = [
     "How do you think technology can help improve mental health?",
@@ -153,8 +152,8 @@ function Home() {
     setChatHistory([
       ...newHistory,
       { sender: 'bot', text: aiResult.text },
-      aiResult.followUp && { sender: 'bot', text: `Follow-up: ${aiResult.followUp}` },
-      aiResult.resource && { sender: 'bot', text: `Resource: ${aiResult.resource.title} - ${aiResult.resource.url}` }
+      aiResult.followUp && { sender: 'bot', text: `${aiResult.followUp}` },
+      aiResult.resource && { sender: 'bot', text: `${aiResult.resource.title} - ${aiResult.resource.url}` }
     ].filter(Boolean));
     setFollowUp(aiResult.followUp);
     setResource(aiResult.resource ? `${aiResult.resource.title} - ${aiResult.resource.url}` : '');
@@ -164,30 +163,31 @@ function Home() {
     const mood = detectMood(userInput);
 
     setPetMood(moodToPetImage[mood] || neutral);
+    setTimeout(() => {
+      setPetMood(neutral) // Reset mood to neutral after timeout
+      console.log(`Pet mood has been reset to: ${petMood}`);
+    }, 3000);
     const today = new Date().toISOString().split('T')[0];
     const logs = JSON.parse(localStorage.getItem('moodLogs')) || [];
     logs.push({ mood, date: today });
     localStorage.setItem('moodLogs', JSON.stringify(logs));
 
-    const newXp = xp + 10;
-    setXp(newXp);
-    if (user) {
-      await set(ref(database, `users/${user.uid}/xp`), newXp);
-    }
+    gainXp(10);
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
   };
 
   const handleChallengeSubmit = async () => {
     if (challengeAnswer.trim()) {
-      const newXp = xp + 50;
-      const newCoins = coins + 50;
-      setXp(newXp);
-      setCoins(newCoins);
+      gainXp(50);
+      setCoins(coins + 5);
       setChallengeAnswer('');
       alert('Challenge completed! You earned 50 XP!');
       setPetMood(happy);
+      setTimeout(() => {
+        setPetMood(neutral) // Reset mood to neutral after timeout
+        console.log(`Pet mood has been reset to: ${petMood}`);
+      }, 3000);
       if (user) {
-        await set(ref(database, `users/${user.uid}/xp`), newXp);
         await set(ref(database, `users/${user.uid}/coins`), newCoins);
       }
     } else {
