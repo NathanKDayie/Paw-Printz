@@ -66,7 +66,14 @@ function Home() {
   const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
-    "How can we better support each other during tough times?"
+    "How can we better support each other during tough times?",
+    "What are some self-care practices you find helpful?",
+    "How do you define happiness?",
+    "What are some things that make you feel grateful?",
+    "How do you cope with stress?",
+    "What are some activities that bring you joy?",
+    "How do you practice mindfulness in your daily life?",
+    "What are some ways to build resilience in the face of challenges?"
   ];
 
   useEffect(() => {
@@ -93,9 +100,9 @@ function Home() {
 
   const detectMood = (input) => {
     if (input.toLowerCase().startsWith('not')) return 'sad';
-    const happy = ['happy', 'joyful', 'excited', 'glad', 'awesome', 'good', 'great'];
-    const neutral = ['okay', 'fine', 'meh', 'neutral', 'alright'];
-    const sad = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed'];
+    const happy = ['happy', 'joyful', 'excited', 'glad', 'awesome', 'good', 'great', 'fantastic', 'amazing', 'wonderful', 'elated', 'cheerful', 'content', 'pleased'];
+    const neutral = ['okay', 'fine', 'meh', 'neutral', 'alright', 'normal', 'indifferent', 'average', 'so-so', 'okay'];
+    const sad = ['sad', 'upset', 'down', 'bad', 'angry', 'depressed', 'frustrated', 'disappointed', 'unhappy', 'miserable', 'gloomy', 'blue', 'dismal', 'sorrowful', 'distressed'];
     const words = input.toLowerCase().split(' ');
 
     if (words.some(w => happy.includes(w))) return 'happy';
@@ -166,7 +173,11 @@ function Home() {
       setChallengeAnswer('');
       alert('Challenge completed! You earned 50 XP!');
       setPetMood(happy);
-      setTimeout(() => setPetMood(neutral), 3000);
+      setTimeout(() => 
+        setPetMood(neutral),
+        setChallenge(''),
+        setChallengeAnswer('')
+      , 3000);
 
       if (user) {
         await set(ref(database, `users/${user.uid}/coins`), newCoins);
@@ -196,13 +207,18 @@ function Home() {
         <div className="challenges-box">
           <h2>Challenges</h2>
           <p>{challenge}</p>
-          <input
+          {challenge ?
+          <>
+            <input
             type="text"
             value={challengeAnswer}
             onChange={(e) => setChallengeAnswer(e.target.value)}
             placeholder="Type your answer here..."
           />
           <button onClick={handleChallengeSubmit}>Submit Answer</button>
+          </>
+          : <p>Talk to your pet to unlock a challenge!</p>
+          }
         </div>
 
         <div
