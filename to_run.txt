@@ -1,0 +1,2 @@
+[in terminal where ollama is downloaded]: ollama run llama3.2
+[In Paw Printz repository, navigate to client]: npm run dev
