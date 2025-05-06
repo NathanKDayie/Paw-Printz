@@ -9,6 +9,7 @@ import neutral from './assets/chip-neutral.png';
 import happy from './assets/chip-happy.png';
 import sad from './assets/chip-sad.png';
 import background from './assets/mdflagbg.jpg';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import './App.css';
 
 function App() {
@@ -24,8 +25,8 @@ function App() {
           <Route path="/resourcepage" element={<ResourcePage />} />
           <Route path="/about" element={<About />} />
         </Routes>
+        <Footer />
       </div>
-      <Footer />
     </div>
   );
 }
@@ -38,7 +39,16 @@ function Home() {
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
   const [challengeAnswer, setChallengeAnswer] = useState('');
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
+      setUser(currUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
   const [xp, setXp] = useState(() => parseInt(localStorage.getItem('xp')) || 0);
   const level = Math.floor(xp / 100);
   const xpToNextLevel = 100;
