@@ -62,33 +62,27 @@ function Home() {
   const gainXp = (earnedXp) => {
     const newXp = xp + earnedXp;
     setXp(newXp);
+  
+    const userXpRef = ref(database, `users/${user ? user.uid : "Program Tester"}/xp`);
+    set(userXpRef, newXp)
+      .then(() => console.log("XP saved successfully!: ", newXp))
+      .catch((error) => console.error("Error saving XP:", error));
+  
     if (newXp >= level * 100 + 100) {
       const addCoins = coins + 50;
       const addLevel = level + 1;
-      alert(`Congratulations! You've leveled up to level ${level + 1}! Here's 50 coins!`);
+      alert(`Congratulations! You've leveled up to level ${addLevel}! Here's 50 coins!`);
+  
       const userCoinsRef = ref(database, `users/${user ? user.uid : "Program Tester"}/coins`);
       const userLevelRef = ref(database, `users/${user ? user.uid : "Program Tester"}/level`);
-      set(userLevelRef, addLevel).then(() => {
-        console.log("Level saved successfully!: ", level + 1);
-      }).catch((error) => {
-        console.error("Error saving level:", error);
-      });
-      set(userCoinsRef, addCoins).then(() => {
-        console.log("Coins saved successfully!: ", addCoins);
-      }).catch((error) => {
-        console.error("Error saving coins:", error);
-      });
+      
+      set(userLevelRef, addLevel).catch(err => console.error("Error saving level:", err));
+      set(userCoinsRef, addCoins).catch(err => console.error("Error saving coins:", err));
       
       setCoins(addCoins);
     }
-    const userXpRef = ref(database, `users/${user ? user.uid : "Program Tester"}/xp`);
-    set(userXpRef, xp) .then(() => {
-      console.log("XP saved successfully!: ", newXp);
-    })
-    .catch((error) => {
-      console.error("Error saving XP:", error);
-    });
   };
+  
   const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
