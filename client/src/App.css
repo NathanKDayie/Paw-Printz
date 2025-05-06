@@ -134,9 +134,12 @@ div {
 }
 
 .footer a:hover {
-    color: #fdb515;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10%; 
+    color: #ffba57;
 }
-
 .footer ul{
     display: flex;
     list-style: none;
@@ -190,10 +193,74 @@ div {
     display: flex;
     height: 30px;
     width: 40px;
-    background-color: #bbb;
+    background-color: rgba(0,0,0,0.4);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 50%;
     align-items: center;
     justify-content: center;
     font-weight: bold;
 }
+
+.challenge-item {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    margin: 20px;
+    font-size: 16px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checkbox-label{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    margin: 0;
+    border-radius: 3px;
+    border: 2px solid #015d62;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Add checkmark using pseudo-element */
+  .checkbox-label input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: #015d62;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+  }
+  
+  /* Show checkmark when checked */
+  .checkbox-label input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+
+  .circle-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .circle-button:hover {
+    background-color: #1573df;
+    transition: background-color 0.3s ease;
+  }
+  

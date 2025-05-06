@@ -1,41 +1,64 @@
-import {Route, Routes, } from 'react-router-dom'
-import {useState} from 'react'
-import Nav from './Nav'
-import Logs from './pages/Logs'
-import Store from './pages/Store'
-import ResourcePage from './pages/ResourcePage'
-import About from './pages/About'
-import neutral from './assets/chip-neutral.png'
-import happy from './assets/chip-happy.png'
-import sad from './assets/chip-sad.png'
-import background from './assets/mdflagbg.jpg'
-import './App.css'
+import { Route, Routes } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import Nav from './Nav';
+import Logs from './pages/Logs';
+import Store from './pages/Store';
+import ResourcePage from './pages/ResourcePage';
+import About from './pages/About';
+import neutral from './assets/chip-neutral.png';
+import happy from './assets/chip-happy.png';
+import sad from './assets/chip-sad.png';
+import background from './assets/mdflagbg.jpg';
+import './App.css';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAIResponse } from './api/localai';
 
 function App() {
   return (
-    <div className="app-container" style={{ backgroundImage: `url(${background}` }}>
+    <div className="app-container" style={{ backgroundImage: `url(${background})` }}>
       <Nav />
       <div className="container">
         <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/logs" element={<Logs />} />
-            <Route path="/store" element={<Store />} />
-            <Route path="/resourcepage" element={<ResourcePage />} />
-            <Route path="/about" element={<About />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/logs" element={<Logs />} />
+          <Route path="/store" element={<Store />} />
+          <Route path="/resourcepage" element={<ResourcePage />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
-      <Footer/>
+      <Footer />
     </div>
-  )
+  );
 }
 
 function Home() {
   const [userInput, setUserInput] = useState('');
-  const [response, setResponse] = useState('');
   const [petMood, setPetMood] = useState(neutral);
   const [challenge, setChallenge] = useState('');
+  const [challengeAnswer, setChallengeAnswer] = useState('');
   const [resource, setResource] = useState('');
   const [followUp, setFollowUp] = useState('');
+  const [conversationState, setConversationState] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([
+    { sender: 'bot', text: 'How are you feeling today?' }
+  ]);
+  const [user, setUser] = useState(null);
+
+  const messageEndRef = useRef(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
+      setUser(currUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const [xp, setXp] = useState(() => parseInt(localStorage.getItem('xp')) || 0);
+  const level = Math.floor(xp / 100);
+  const xpToNextLevel = 100;
+  const xpProgress = xp % xpToNextLevel;
 
   const challenges = [
     "How do you think technology can help improve mental health?",
@@ -43,141 +66,199 @@ function Home() {
     "How can we better support each other during tough times?",
   ];
 
-  const resources = {
-    happy: ["Keep up the positive vibes! 😊"],
-    neutral: [
-      "Here's a funny video to improve your mood: https://www.youtube.com/watch?v=orK3Ug_DHOM",
-      "Try reading your favorite book. 📚",
-      "Check out this playlist of random upbeat songs: https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN",
-    ],
-    sad: [
-      "Here's a video of baby animals to lift your spirits: https://www.youtube.com/watch?v=kj1-rR3udNs",
-      "Give RIH a call at 410-455-2542 and seek counseling service if you need it!",
-      "Check out this website that could help you deal with negative emotions: https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad",
-    ],
-  };
+  useEffect(() => {
+    localStorage.setItem('xp', xp);
+  }, [xp]);
 
-  const followUps = {
-    happy: [
-      "What's the best thing that happened today?",
-      "Would you like to share what made you so happy?",
-      "That's great! How do you plan to keep this positive energy going?",
-    ],
-    neutral: [
-      "Is there something that could make your day better?",
-      "Would you like to talk about anything in particular?",
-      "Sometimes taking a short break helps. What do you think?",
-    ],
-    sad: [
-      "Would you like to talk about what's bothering you?",
-      "Is there something I can do to help you feel better?",
-      "Have you tried doing something you enjoy today?",
-    ],
-  };
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory, loading]);
+
+  // --- Mood detection keywords ---
+  const happyKeywords = [
+    "happy", "joyful", "excited", "ecstatic", "thrilled", "elated", "cheerful", "delighted",
+    "awesome", "fantastic", "great", "wonderful", "amazing", "glad", "celebrating", "grateful",
+    "overjoyed", "giddy", "playful", "fun", "smiling", "laughing", "bubbly", "feeling great"
+  ];
+
+  const contentKeywords = [
+    "content", "relaxed", "chill", "calm", "satisfied", "peaceful", "easygoing", "fine", "balanced",
+    "zen", "laid back", "unbothered", "steady", "quiet", "neutral", "stable"
+  ];
+
+  const stressedKeywords = [
+    "stressed", "anxious", "overwhelmed", "tense", "nervous", "pressured", "panicked", "frantic",
+    "worried", "burned out", "exhausted", "restless", "irritable", "jittery", "snappy", "tight"
+  ];
+
+  const sadKeywords = [
+    "sad", "down", "depressed", "lonely", "blue", "miserable", "hopeless", "heartbroken", "melancholy",
+    "low", "crying", "despair", "helpless", "lost", "gloomy", "defeated", "numb", "isolated"
+  ];
+
+  const angryKeywords = [
+    "angry", "mad", "furious", "frustrated", "irritated", "annoyed", "enraged", "upset", "pissed",
+    "resentful", "offended", "bitter", "snappy", "hostile", "agitated", "outraged"
+  ];
+
+  const confusedKeywords = [
+    "confused", "lost", "uncertain", "unsure", "doubtful", "mixed up", "puzzled", "disoriented",
+    "conflicted", "perplexed", "torn", "blurred", "muddled"
+  ];
+
+  const neutralKeywords = [
+    "okay", "fine", "meh", "neutral", "alright", "so-so", "average", "decent", "typical", "standard",
+    "nothing special", "normal", "indifferent"
+  ];
 
   const detectMood = (input) => {
-    if (input.toLowerCase().startsWith('not')) {
-      return 'sad';
-    }
-    const happyKeywords = [
-      'happy', 'joyful', 'excited', 'content', 'glad', 'cheerful', 'thrilled',
-      'delighted', 'ecstatic', 'elated', 'satisfied', 'grateful', 'hopeful',
-      'optimistic', 'overjoyed', 'great', 'good', 'nice', 'awesome', 'fantastic',
-      'wonderful', 'amazing', 'fabulous', 'incredible', 'superb', 'excellent',
-      'positive', 'uplifting', 'energetic', 'enthusiastic', 'motivated', 'inspired',
-      'playful', 'fun', 'jovial', 'lighthearted', 'bubbly', 'radiant', 'sparkling',
-      'sunny', 'bright', 'cheery', 'smiling', 'laughing', 'joking', 'silly', 'playful',
-    ];
-    const neutralKeywords = ['okay', 'fine', 'alright', 'meh', 'so-so', 'neutral', 'cool', 'ok'];
-    const sadKeywords = [
-      'sad', 'upset', 'down', 'depressed', 'unhappy', 'miserable', 'gloomy',
-      'heartbroken', 'not feeling well', 'bad', 'terrible', 'awful', 'angry',
-      'frustrated', 'disappointed', 'stressed', 'anxious', 'worried', 'nervous',
-      'fearful', 'hopeless', 'lonely', 'isolated', 'lost', 'confused', 'helpless',
-      'overwhelmed', 'exhausted', 'fatigued', 'drained', 'weary',
-    ];
+    const words = input.toLowerCase().split(/\s+/);
 
-    const words = input.toLowerCase().split(' ');
-    if (words.some((word) => happyKeywords.includes(word))) return 'happy';
-    if (words.some((word) => neutralKeywords.includes(word))) return 'neutral';
-    if (words.some((word) => sadKeywords.includes(word))) return 'sad';
-    return null;
+    if (words.some(word => happyKeywords.includes(word))) return 'happy';
+    if (words.some(word => contentKeywords.includes(word))) return 'content';
+    if (words.some(word => stressedKeywords.includes(word))) return 'stressed';
+    if (words.some(word => sadKeywords.includes(word))) return 'sad';
+    if (words.some(word => angryKeywords.includes(word))) return 'angry';
+    if (words.some(word => confusedKeywords.includes(word))) return 'confused';
+    if (words.some(word => neutralKeywords.includes(word))) return 'neutral';
+
+    return 'neutral'; // fallback
   };
 
-  const handleSubmit = () => {
+  const moodToPetImage = {
+    happy: happy,
+    content: happy,
+    neutral: neutral,
+    confused: neutral,
+    sad: sad,
+    stressed: sad,
+    angry: sad
+  };
+
+  const handleSubmit = async () => {
+    if (!userInput.trim()) return;
+    const newHistory = [...chatHistory, { sender: 'user', text: userInput }];
+    setChatHistory(newHistory);
+    setUserInput('');
+    setLoading(true);
+
+    const aiResult = await getAIResponse(userInput, conversationState);
+
+    setChatHistory([
+      ...newHistory,
+      { sender: 'bot', text: aiResult.text },
+      aiResult.followUp && { sender: 'bot', text: `Follow-up: ${aiResult.followUp}` },
+      aiResult.resource && { sender: 'bot', text: `Resource: ${aiResult.resource.title} - ${aiResult.resource.url}` }
+    ].filter(Boolean));
+
+    setFollowUp(aiResult.followUp);
+    setResource(aiResult.resource ? `${aiResult.resource.title} - ${aiResult.resource.url}` : '');
+    setConversationState(aiResult.nextStep);
+    setLoading(false);
+
+    // Detect mood and log it
     const mood = detectMood(userInput);
-    if (mood === 'happy') {
-      setResponse("That's wonderful! 😊 I'm so happy to hear you're feeling good!");
-      setPetMood(happy);
-    } else if (mood === 'neutral') {
-      setResponse("That's okay! Everyone has those neutral days. 😊");
-      setPetMood(neutral);
-    } else if (mood === 'sad') {
-      setResponse("I'm here for you during this tough time. Things will get better soon.");
-      setPetMood(sad);
-    } else {
-      setResponse("I'm not quite sure how to interpret that, but I'm here to listen! 💭");
-      setPetMood(neutral);
-    }
+    setPetMood(moodToPetImage[mood] || neutral);
+    const today = new Date().toISOString().split('T')[0];
+    const existingLogs = JSON.parse(localStorage.getItem('moodLogs')) || [];
+    const updatedLogs = [...existingLogs, { mood, date: today }];
+    localStorage.setItem('moodLogs', JSON.stringify(updatedLogs));
 
-    // Set a random challenge, resource, and follow-up question
+    // Reward XP
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
-    setResource(resources[mood]?.[Math.floor(Math.random() * resources[mood].length)] || '');
-    setFollowUp(followUps[mood]?.[Math.floor(Math.random() * followUps[mood].length)] || '');
+    setXp(prev => prev + 10);
+  };
 
-    setUserInput(''); // Clear the input field
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleSubmit();
+  };
+
+  const handleChallengeSubmit = () => {
+    if (challengeAnswer.trim()) {
+      setXp(prev => prev + 50);
+      setChallengeAnswer('');
+      alert('Challenge completed! You earned 50 XP!');
+    } else {
+      alert('Please enter your challenge answer.');
+    }
+  };
+
+  const handleChallengeKeyDown = (e) => {
+    if (e.key === 'Enter') handleChallengeSubmit();
   };
 
   return (
     <div className='home-container'>
       <div className='user-level'>
-        <span className="level-circle">1</span>
+        <span className="level-circle">{level}</span>
         <div className='progress-bar'>
-          <span style={{ width: '10%' }}></span>
+          <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
         </div>
+        <p>XP: {xp} / {level * 100 + 100}</p>
       </div>
+
       <div className='home-content'>
         <div className="challenges-box">
           <h2>Challenges</h2>
           <p>{challenge}</p>
+          <input
+            type="text"
+            value={challengeAnswer}
+            onChange={(e) => setChallengeAnswer(e.target.value)}
+            onKeyDown={handleChallengeKeyDown}
+            placeholder="Type your answer here..."
+          />
+          <button onClick={handleChallengeSubmit}>Submit Answer</button>
         </div>
+
         <div className="pet-container">
-          <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+          <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%' }} />
         </div>
+
         <div className="text-box">
-          <h2>How are you feeling today?</h2>
+          {user ? <h2>Hi {user.displayName}, Welcome to PawPrintz!</h2> : <h2>Welcome to PawPrintz!</h2>}
+          <div
+            style={{
+              maxHeight: '400px',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              padding: '10px',
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              marginBottom: '10px'
+            }}>
+            {chatHistory.map((msg, index) => (
+              <div
+                key={index}
+                style={{
+                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                  background: msg.sender === 'user' ? '#DCF8C6' : '#F1F0F0',
+                  padding: '10px 14px',
+                  borderRadius: '16px',
+                  maxWidth: '70%',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}>
+                {msg.text}
+              </div>
+            ))}
+            {loading && <div style={{ fontStyle: 'italic' }}>Typing...</div>}
+            <div ref={messageEndRef} />
+          </div>
+
           <input
             type="text"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Type your feelings here..."
           />
-          <button onClick={handleSubmit}>Submit</button>
-          <p>{response}</p>
-          <p><strong>Follow-up:</strong> {followUp}</p>
-          <p><strong>Resource:</strong> <a href={resource} target="_blank" rel="noopener noreferrer">{resource}</a></p>
+          <button onClick={handleSubmit}>Send</button>
         </div>
       </div>
     </div>
-  );
-}
-
-function Checkbox() {
-  const [visible, setVisible] = useState(true);
-
-  return (
-    <>
-      {visible && (
-        <div className="check-box">
-          <label htmlFor="check">Mark as Complete</label>
-          <input
-            type="checkbox"
-            id="check"
-            onClick={() => setVisible(false)}
-          />
-        </div>
-      )}
-    </>
   );
 }
 
@@ -189,8 +270,7 @@ function Footer() {
         <p><a href="https://health.umbc.edu" target="_blank">RIH</a></p>
       </ul>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;
