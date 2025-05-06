@@ -15,11 +15,15 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, set, get, child } from "firebase/database";
 import { database } from "./firebaseConfig";
 import { getAIResponse } from './api/localai';
-import './App.css';
+import forestbg from './assets/forestbg.png';
+import umbcbg from './assets/umbcbg.png';
 
+const backgroundImages = {
+  'forestbg.png': forestbg,
+  'umbcbg.png': umbcbg
+};
 
 function App() {
-
   return (
     <div className="app-container" style={{ backgroundImage: `url(${background})` }}>
       <Nav />
@@ -46,12 +50,12 @@ function Home() {
   const [followUp, setFollowUp] = useState('');
   const [conversationState, setConversationState] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState([
-    { sender: 'bot', text: 'How are you feeling today?' }
-  ]);
+  const [chatHistory, setChatHistory] = useState([{ sender: 'bot', text: 'How are you feeling today?' }]);
+
   const [user, setUser] = useState(null);
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
+  const [backgroundName, setBackgroundName] = useState(null);
 
   const messageEndRef = useRef(null);
 
@@ -59,47 +63,11 @@ function Home() {
   const xpToNextLevel = 100;
   const xpProgress = xp % xpToNextLevel;
 
-  const gainXp = (earnedXp) => {
-    const newXp = xp + earnedXp;
-    setXp(newXp);
-  
-    const userXpRef = ref(database, `users/${user ? user.uid : "Program Tester"}/xp`);
-    set(userXpRef, newXp)
-      .then(() => console.log("XP saved successfully!: ", newXp))
-      .catch((error) => console.error("Error saving XP:", error));
-  
-    if (newXp >= level * 100 + 100) {
-      const addCoins = coins + 50;
-      const addLevel = level + 1;
-      alert(`Congratulations! You've leveled up to level ${addLevel}! Here's 50 coins!`);
-  
-      const userCoinsRef = ref(database, `users/${user ? user.uid : "Program Tester"}/coins`);
-      const userLevelRef = ref(database, `users/${user ? user.uid : "Program Tester"}/level`);
-      
-      set(userLevelRef, addLevel).catch(err => console.error("Error saving level:", err));
-      set(userCoinsRef, addCoins).catch(err => console.error("Error saving coins:", err));
-      
-      setCoins(addCoins);
-    }
-  };
-  
   const challenges = [
     "How do you think technology can help improve mental health?",
     "What are some ways to promote emotional well-being in our communities?",
-    "How can we better support each other during tough times?",
+    "How can we better support each other during tough times?"
   ];
-
-  const resources = {
-    happy: ["https://www.positivityblog.com", "https://www.happify.com"],
-    neutral: ["https://www.youtube.com/watch?v=orK3Ug_DHOM", "https://open.spotify.com/playlist/3eDRY2lvw7zXJg5YqOJoSN"],
-    sad: ["https://www.youtube.com/watch?v=kj1-rR3udNs", "https://www.betterhealth.vic.gov.au/health/healthyliving/its-okay-to-feel-sad"],
-  };
-
-  const followUps = {
-    happy: ["What's the best thing that happened today?", "Would you like to share what made you so happy?"],
-    neutral: ["Is there something that could make your day better?", "Would you like to talk about anything in particular?"],
-    sad: ["Would you like to talk about what's bothering you?", "Have you tried doing something you enjoy today?"],
-  };
 
   useEffect(() => {
     const auth = getAuth();
@@ -110,8 +78,10 @@ function Home() {
         const dbRef = ref(database);
         const xpSnap = await get(child(dbRef, `users/${uid}/xp`));
         const coinSnap = await get(child(dbRef, `users/${uid}/coins`));
+        const bgSnap = await get(child(dbRef, `users/${uid}/background`));
         setXp(xpSnap.exists() ? xpSnap.val() : 0);
         setCoins(coinSnap.exists() ? coinSnap.val() : 0);
+        setBackgroundName(bgSnap.exists() ? bgSnap.val() : null);
       }
     });
     return () => unsubscribe();
@@ -136,51 +106,68 @@ function Home() {
 
   const moodToPetImage = { happy, neutral, sad };
 
+  const gainXp = (earnedXp) => {
+    const newXp = xp + earnedXp;
+    setXp(newXp);
+
+    if (user) {
+      set(ref(database, `users/${user.uid}/xp`), newXp);
+    }
+
+    if (newXp >= level * 100 + 100) {
+      const newCoins = coins + 50;
+      const newLevel = level + 1;
+      setCoins(newCoins);
+      alert(`Congratulations! You've reached level ${newLevel}!`);
+
+      if (user) {
+        set(ref(database, `users/${user.uid}/coins`), newCoins);
+        set(ref(database, `users/${user.uid}/level`), newLevel);
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     if (!userInput.trim()) return;
+
     const newHistory = [...chatHistory, { sender: 'user', text: userInput }];
     setChatHistory(newHistory);
     setUserInput('');
     setLoading(true);
+
     const aiResult = await getAIResponse(userInput, conversationState);
     setChatHistory([
       ...newHistory,
       { sender: 'bot', text: aiResult.text },
-      aiResult.followUp && { sender: 'bot', text: `${aiResult.followUp}` },
+      aiResult.followUp && { sender: 'bot', text: aiResult.followUp },
       aiResult.resource && { sender: 'bot', text: `${aiResult.resource.title} - ${aiResult.resource.url}` }
     ].filter(Boolean));
-    setFollowUp(aiResult.followUp);
-    setResource(aiResult.resource ? `${aiResult.resource.title} - ${aiResult.resource.url}` : '');
+
     setConversationState(aiResult.nextStep);
+    setFollowUp(aiResult.followUp || '');
+    setResource(aiResult.resource || '');
     setLoading(false);
 
     const mood = detectMood(userInput);
-
-    setPetMood(moodToPetImage[mood] || neutral);
-    setTimeout(() => {
-      setPetMood(neutral) // Reset mood to neutral after timeout
-      console.log(`Pet mood has been reset to: ${petMood}`);
-    }, 3000);
-    const today = new Date().toISOString().split('T')[0];
-    const logs = JSON.parse(localStorage.getItem('moodLogs')) || [];
-    logs.push({ mood, date: today });
-    localStorage.setItem('moodLogs', JSON.stringify(logs));
+    setPetMood(moodToPetImage[mood]);
+    setTimeout(() => setPetMood(neutral), 3000);
 
     gainXp(10);
+
+    // Trigger new challenge
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
   };
 
   const handleChallengeSubmit = async () => {
     if (challengeAnswer.trim()) {
       gainXp(50);
-      setCoins(coins + 5);
+      const newCoins = coins + 5;
+      setCoins(newCoins);
       setChallengeAnswer('');
       alert('Challenge completed! You earned 50 XP!');
       setPetMood(happy);
-      setTimeout(() => {
-        setPetMood(neutral) // Reset mood to neutral after timeout
-        console.log(`Pet mood has been reset to: ${petMood}`);
-      }, 3000);
+      setTimeout(() => setPetMood(neutral), 3000);
+
       if (user) {
         await set(ref(database, `users/${user.uid}/coins`), newCoins);
       }
@@ -189,23 +176,12 @@ function Home() {
     }
   };
 
-  // const handleChallengeSubmit = () => {
-  //   if (challengeAnswer.trim()) {
-  //     setXp(prev => prev + 50);
-  //     setChallengeAnswer('');
-  //     alert('Challenge completed! You earned 50 XP!');
-  //     setPetMood(happy);
-  //   } else {
-  //     alert('Please enter your challenge answer.');
-  //   }
-  // };
-
   return (
-    <div className='home-container'>
-      <div className='user-info'>
-        <div className='user-level'>
+    <div className="home-container">
+      <div className="user-info">
+        <div className="user-level">
           <span className="level-circle">{level}</span>
-          <div className='progress-bar'>
+          <div className="progress-bar">
             <span style={{ width: `${(xpProgress / xpToNextLevel) * 100}%` }}></span>
           </div>
           <p>XP: {xp} / {level * 100 + 100}</p>
@@ -216,7 +192,7 @@ function Home() {
         </div>
       </div>
 
-      <div className='home-content'>
+      <div className="home-content">
         <div className="challenges-box">
           <h2>Challenges</h2>
           <p>{challenge}</p>
@@ -229,7 +205,16 @@ function Home() {
           <button onClick={handleChallengeSubmit}>Submit Answer</button>
         </div>
 
-        <div className="pet-container">
+        <div
+          className="pet-container"
+          style={{
+            backgroundImage: backgroundName ? `url(${backgroundImages[backgroundName]})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderRadius: '12px',
+            padding: '20px',
+          }}
+        >
           <img src={petMood} alt="Pet Mood" style={{ maxWidth: '100%', maxHeight: '100%' }} />
         </div>
 
