@@ -12,7 +12,7 @@ import goldCoin from './assets/goldcoin.png';
 import background from './assets/mdflagbg.jpg';
 import './App.css';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { ref, set, get, child } from "firebase/database";
+import { ref, set, get, child, push } from "firebase/database";
 import { database } from "./firebaseConfig";
 import { getAIResponse } from './api/localai';
 import forestbg from './assets/forestbg.png';
@@ -60,7 +60,7 @@ function Home() {
 
   const messageEndRef = useRef(null);
 
-  const level = Math.floor(xp / 100);
+  const [level, setLevel] = useState(1);
   //const xpToNextLevel = 100;
   const xpProgress = xp % levelCap;
 
@@ -112,28 +112,45 @@ function Home() {
     return 'neutral';
   };
 
+  const saveMoodLog = async (user, mood, date) => {
+    if (!user || !user.uid) {
+      console.error('User not authenticated.');
+      return;
+    }
+  
+    try {
+      const userLogsRef = ref(database, `users/${user.uid}/moodLogs`);
+      await push(userLogsRef, { mood, date });
+  
+      console.log('Mood log saved successfully.');
+    } catch (error) {
+      console.error('Error saving mood log:', error);
+    }
+  };
+
   const moodToPetImage = { happy, neutral, sad };
 
   const gainXp = (earnedXp) => {
     const newXp = xp + earnedXp;
     setXp(newXp);
 
-    if (user) {
-      set(ref(database, `users/${user.uid}/xp`), newXp);
-    }
-
     if (newXp >= levelCap) {
       const newCoins = coins + 50;
       const newLevel = level + 1;
       setCoins(newCoins);
       setLevelCap(levelCap + 100);
-      setXp(0);
+      setLevel(newLevel);
+      setXp(newXp - levelCap);
       alert(`Congratulations! You've reached level ${newLevel}!`);
 
       if (user) {
-        set(ref(database, `users/${user.uid}/coins`), newCoins);
-        set(ref(database, `users/${user.uid}/level`), newLevel);
+        set(ref(database, `users/${user.uid}/coins`), coins);
+        set(ref(database, `users/${user.uid}/level`), level);
       }
+    }
+
+    if (user) {
+      set(ref(database, `users/${user.uid}/xp`), xp);
     }
   };
 
@@ -159,12 +176,11 @@ function Home() {
     setLoading(false);
 
     const mood = detectMood(userInput);
+    saveMoodLog(user, mood, new Date().toLocaleString());
     setPetMood(moodToPetImage[mood]);
     setTimeout(() => setPetMood(neutral), 3000);
 
     gainXp(10);
-
-    // Trigger new challenge
     setChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
   };
 
@@ -176,14 +192,14 @@ function Home() {
       setChallengeAnswer('');
       alert('Challenge completed! You earned 50 XP!');
       setPetMood(happy);
-      setTimeout(() => 
+      setTimeout(() => {
         setPetMood(neutral),
         setChallenge(''),
         setChallengeAnswer('')
-      , 3000);
+    }, 3000);
 
       if (user) {
-        await set(ref(database, `users/${user.uid}/coins`), newCoins);
+        await set(ref(database, `users/${user.uid}/coins`), coins);
       }
     } else {
       alert('Please enter your challenge answer.');
